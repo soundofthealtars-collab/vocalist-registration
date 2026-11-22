@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="registration-api" content="">
     <title>Sound of the Altar | The 120 Edition</title>
     <style>
         :root {
@@ -145,6 +146,7 @@
     const identityType = document.querySelector('#identity_type');
     const identityNumberLabel = document.querySelector('#identity_number_label');
     const identityNumber = document.querySelector('#identity_number');
+    const registrationApi = document.querySelector('meta[name="registration-api"]').content.trim();
 
     identityType.addEventListener('change', () => {
         const passport = identityType.value === 'passport';
@@ -168,8 +170,12 @@
     }
 
     async function loadCapacity() {
+        if (!registrationApi) {
+            unavailable.textContent = 'Registration is not configured yet. Please try again later.';
+            return;
+        }
         try {
-            const response = await fetch('/api/register');
+            const response = await fetch(registrationApi);
             const data = await response.json();
             if (!response.ok || !data.ok) throw new Error('Unavailable');
             showCapacity(data);
@@ -180,11 +186,12 @@
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (!registrationApi) return;
         error.hidden = true;
         submitButton.disabled = true;
         try {
             const payload = Object.fromEntries(new FormData(form));
-            const response = await fetch('/api/register', {
+            const response = await fetch(registrationApi, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
