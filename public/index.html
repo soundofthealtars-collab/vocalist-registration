@@ -14,19 +14,43 @@
             --white: #ffffff;
         }
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        html { scroll-behavior: smooth; }
         body {
             margin: 0;
             min-height: 100vh;
             background: radial-gradient(circle at top, #0c2175 0%, var(--navy-dark) 100%);
             color: var(--white);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 0 0 20px;
+        }
+        .welcome-poster {
+            position: relative;
+            width: min(100%, 1600px);
+            margin: 0 auto 28px;
+            line-height: 0;
+        }
+        .welcome-poster img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .poster-register-link {
+            position: absolute;
+            left: 5.9%;
+            top: 79.8%;
+            width: 28.1%;
+            height: 7.5%;
+            border-radius: 999px;
+            color: transparent;
+            font-size: 0;
+        }
+        .poster-register-link:focus-visible {
+            outline: 3px solid var(--flame-gold);
+            outline-offset: 3px;
         }
         .card {
-            width: 100%;
+            width: min(calc(100% - 40px), 480px);
             max-width: 480px;
+            margin: 0 auto 32px;
             background: rgba(6, 19, 72, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 16px;
@@ -85,7 +109,11 @@
     </style>
 </head>
 <body>
-<main class="card">
+<section class="welcome-poster" aria-label="Sound of the Altar registration poster">
+    <img src="welcome.jpeg" alt="Sound of the Altar: registering 120 vocalists for the live recording.">
+    <a class="poster-register-link" href="#registration">Register now</a>
+</section>
+<main class="card" id="registration">
     <header style="border-bottom:1px solid #52628a;padding-bottom:20px;margin-bottom:20px"><small style="letter-spacing:.18em;color:#ffb800">LIVE RECORDING / THE 120 EDITION</small><p style="font:italic 2.5rem Georgia,serif;margin:8px 0">Sound of the Altar</p></header>
     <div id="capacity" class="badge" hidden></div>
     <h1>Vocalist Registration</h1>
