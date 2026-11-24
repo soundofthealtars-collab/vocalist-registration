@@ -1,2 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="registration-api" content="https://vocalist-registration-api.sota-120-api.workers.dev/api/register">egister">
+    <title>Sound of the Altar | The 120 Edition</title>
+    <style>
+        :root {
+            --navy-dark: #040d33;
+            --navy-main: #061348;
+            --flame-orange: #ff5e00;
+            --flame-gold: #ffb800;
+            --white: #ffffff;
+        }
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #0c2175 0%, var(--navy-dark) 100%);
+            color: var(--white);
+            padding: 0 0 20px;
+        }
+        .welcome-poster {
+            position: relative;
+            width: min(100%, 1600px);
+            margin: 0 auto 28px;
+            line-height: 0;
+        }
+        .welcome-poster img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .poster-register-link {
+            position: absolute;
+            left: 5.9%;
+            top: 79.8%;
+            width: 28.1%;
+            height: 7.5%;
+            border-radius: 999px;
+            color: transparent;
+            font-size: 0;
+        }
+        .poster-register-link:focus-visible {
+            outline: 3px solid var(--flame-gold);
+            outline-offset: 3px;
+        }
+        .card {
+            width: min(calc(100% - 40px), 480px);
+            max-width: 480px;
+            margin: 0 auto 32px;
+            background: rgba(6, 19, 72, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+        }
+        .logo { width: 100%; max-height: 180px; object-fit: contain; margin-bottom: 12px; border-radius: 8px; }
+        .badge {
+            display: inline-block;
+            background: rgba(255, 94, 0, 0.18);
+            border: 1px solid var(--flame-orange);
+            color: var(--flame-gold);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        h1 { margin: 0 0 6px; font-size: 1.6rem; }
+        p.sub { margin: 0 0 22px; color: #cbd5e1; font-size: 0.95rem; line-height: 1.4; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #e2e8f0; }
+        input[type="text"], input[type="tel"], select {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(4, 13, 51, 0.8);
+            color: var(--white);
+            font-size: 1rem;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--flame-gold); }
+        .check-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px; font-size: 0.88rem; color: #cbd5e1; }
+        .field-note { margin: -10px 0 16px; color: #cbd5e1; font-size: 0.78rem; line-height: 1.4; }
+        .check-row input { margin-top: 3px; accent-color: var(--flame-orange); }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--flame-gold), var(--flame-orange));
+            color: #040d33;
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        button:hover { transform: translateY(-1px); }
+        button:disabled { cursor: wait; opacity: 0.7; }
+        .alert { padding: 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.92rem; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+<body>
+<section class="welcome-poster" aria-label="Sound of the Altar registration poster">
+    <img src="welcome.jpeg" alt="Sound of the Altar: registering 120 vocalists for the live recording.">
+    <a class="poster-register-link" href="#registration">Register now</a>
+</section>
+<main class="card" id="registration">
+    <header style="border-bottom:1px solid #52628a;padding-bottom:20px;margin-bottom:20px"><small style="letter-spacing:.18em;color:#ffb800">LIVE RECORDING / THE 120 EDITION</small><p style="font:italic 2.5rem Georgia,serif;margin:8px 0">Sound of the Altar</p></header>
+    <div id="capacity" class="badge" hidden></div>
+    <h1>Vocalist Registration</h1>
+    <p class="sub">Register below to secure your spot for the live recording.</p>
+
+    <div id="success" class="alert alert-success" role="status" hidden></div>
+    <div id="error" class="alert alert-error" role="alert" hidden></div>
+    <p id="unavailable" role="alert">Checking registration availability...</p>
+    <div id="closed" class="alert alert-error" hidden></div>
+
+    <form id="registration-form" hidden>
+        <label for="full_name">Full Name *</label>
+        <input id="full_name" type="text" name="full_name" maxlength="160" placeholder="e.g. Brian Mwangi" required>
+
+        <label for="whatsapp_number">WhatsApp Phone Number *</label>
+        <input id="whatsapp_number" type="tel" name="whatsapp_number" maxlength="30" placeholder="e.g. 0712 345 678" required>
+
+        <label for="identity_type">Identity Document *</label>
+        <select id="identity_type" name="identity_type" required>
+            <option value="national_id">My National ID</option>
+            <option value="guardian_national_id">Parent / Guardian National ID</option>
+            <option value="passport">Passport</option>
+        </select>
+
+        <label id="identity_number_label" for="identity_number">National ID Number *</label>
+        <input id="identity_number" type="text" name="identity_number" autocomplete="off" maxlength="24" placeholder="Enter your National ID number" required>
+        <p class="field-note">Stored in the organizers' registration sheet to prevent duplicate registrations. A parent or guardian may use the same ID for multiple children.</p>
+
+        <label for="vocal_part">Vocal Part *</label>
+        <select id="vocal_part" name="vocal_part" required>
+            <option value="">-- Select Vocal Part --</option>
+            <option value="Soprano">Soprano</option>
+            <option value="Alto">Alto</option>
+            <option value="Tenor">Tenor</option>
+            <option value="Bass">Bass</option>
+            <option value="Unsure">Not Sure (Vocal Placement)</option>
+        </select>
+
+        <label for="church_ministry">Church / Ministry (Optional)</label>
+        <input id="church_ministry" type="text" name="church_ministry" maxlength="200" placeholder="Your local church">
+
+        <label class="check-row">
+            <input type="checkbox" name="committed" required>
+            <span>I confirm I am available for the scheduled rehearsals and the live recording.</span>
+        </label>
+
+        <button id="submit-button" type="submit">REGISTER NOW</button>
+    </form>
+</main>
+<script>
+    const form = document.querySelector('#registration-form');
+    const capacityBadge = document.querySelector('#capacity');
+    const unavailable = document.querySelector('#unavailable');
+    const closed = document.querySelector('#closed');
+    const error = document.querySelector('#error');
+    const success = document.querySelector('#success');
+    const submitButton = document.querySelector('#submit-button');
+    const identityType = document.querySelector('#identity_type');
+    const identityNumberLabel = document.querySelector('#identity_number_label');
+    const identityNumber = document.querySelector('#identity_number');
+    const registrationApi = document.querySelector('meta[name="registration-api"]').content.trim();
+
+    identityType.addEventListener('change', () => {
+        const passport = identityType.value === 'passport';
+        identityNumberLabel.textContent = passport ? 'Passport Number *' : identityType.value === 'guardian_national_id' ? 'Parent / Guardian National ID Number *' : 'National ID Number *';
+        identityNumber.placeholder = passport ? 'Enter your passport number' : 'Enter the National ID number';
+        identityNumber.inputMode = passport ? 'text' : 'numeric';
+    });
+
+    function showCapacity(data) {
+        capacityBadge.textContent = `LIMITED SLOTS • ${data.remaining} OF ${data.capacity} REMAINING`;
+        capacityBadge.hidden = false;
+        unavailable.hidden = true;
+        if (data.remaining > 0) {
+            form.hidden = false;
+            closed.hidden = true;
+        } else {
+            form.hidden = true;
+            closed.textContent = `Registration Closed: All ${data.capacity} vocalist slots have been filled.`;
+            closed.hidden = false;
+        }
+    }
+
+    async function loadCapacity() {
+        if (!registrationApi) {
+            unavailable.textContent = 'Registration is not configured yet. Please try again later.';
+            return;
+        }
+        try {
+            const response = await fetch(registrationApi);
+            const data = await response.json();
+            if (!response.ok || !data.ok) throw new Error('Unavailable');
+            showCapacity(data);
+        } catch {
+            unavailable.textContent = 'Registration is temporarily unavailable. Please try again later.';
+        }
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!registrationApi) return;
+        error.hidden = true;
+        submitButton.disabled = true;
+        try {
+            const payload = Object.fromEntries(new FormData(form));
+            const response = await fetch(registrationApi, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                if (data.code === 'full' && data.capacity) {
+                    showCapacity({ capacity: data.capacity, remaining: 0 });
+                    return;
+                }
+                if (data.code === 'duplicate') throw new Error('This National ID or phone number has already been registered.');
+                throw new Error(data.message || 'Check your details and try again.');
+            }
+            form.hidden = true;
+            closed.hidden = true;
+            success.innerHTML = '<strong>Spot Reserved!</strong> Welcome to Sound of the Altar.';
+            const invite = data.whatsappInvite || '';
+            if (/^https:\/\/chat\.whatsapp\.com\/[a-zA-Z0-9_-]+$/.test(invite)) {
+                const link = document.createElement('a');
+                link.href = invite;
+                link.textContent = 'Tap here to join the Vocalists WhatsApp Group →';
+                link.style.cssText = 'display:inline-block;margin-top:16px;color:#ffb800;font-weight:bold';
+                success.append(document.createElement('br'), link);
+            }
+            success.hidden = false;
+            if (Number.isInteger(data.remaining)) {
+                capacityBadge.textContent = `LIMITED SLOTS • ${data.remaining} OF ${data.capacity} REMAINING`;
+                capacityBadge.hidden = false;
+            }
+        } catch (submissionError) {
+            error.textContent = submissionError.message;
+            error.hidden = false;
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+
+    loadCapacity();
+</script>
+</body>
+</html>
